@@ -1,0 +1,103 @@
+version: 2
+
+.save_mix_cache: &save_mix_cache
+  save_cache:
+    key: mix-cache-v1-{{ .Branch }}-{{ checksum "mix.exs" }}-{{ checksum "mix.lock" }}
+    paths:
+      - deps
+      - _build
+
+.restore_mix_cache: &restore_mix_cache
+  restore_cache:
+    keys:
+      - mix-cache-v1-{{ .Branch }}-{{ checksum "mix.exs" }}-{{ checksum "mix.lock" }}
+      - mix-cache-v1-{{ .Branch }}-{{ checksum "mix.exs" }}
+      - mix-cache-v1-{{ .Branch }}
+      - mix-cache-v1-
+
+.install_packages: &install_packages
+  run:
+    name: Install packages
+    command: |
+      echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing' >>/etc/apk/repositories
+      apk add git
+
+.install_dependencies: &install_dependencies
+  run:
+    name: Install dependencies
+    command: |
+      mix local.hex --force
+      mix local.rebar --force
+      mix deps.get
+
+jobs:
+  test:
+    docker:
+      - image: elixir:1.8-alpine
+    steps:
+      - checkout
+      - *install_packages
+      - *restore_mix_cache
+      - *install_dependencies
+      - *save_mix_cache
+      - run: mix test --no-start
+      - store_test_results:
+          path: _build/test/lib/nostrum
+
+  format:
+    docker:
+      - image: elixir:1.8-alpine
+    steps:
+      - checkout
+      - *install_packages
+      - *restore_mix_cache
+      - *install_dependencies
+      - *save_mix_cache
+      - run: mix format --check-formatted
+
+  credo:
+    docker:
+      - image: elixir:1.8-alpine
+    steps:
+      - checkout
+      - *install_packages
+      - *restore_mix_cache
+      - *install_dependencies
+      - *save_mix_cache
+      - run: mix credo
+
+  docs:
+    docker:
+      - image: elixir:1.8-alpine
+    steps:
+      - checkout
+      - *install_packages
+      - *restore_mix_cache
+      - *install_dependencies
+      - *save_mix_cache
+      - run: mix docs
+
+workflows:
+  version: 2
+  test:
+    jobs:
+      - test
+      - format
+      - credo
+      - docs
+  # deploy:
+  #   jobs:
+  #     - pages:
+  #         filters:
+  #           branches:
+  #             only: /master/
+  #           tags:
+  #             only: /^v.*/
+  #     - deploy:
+  #         requires:
+  #           - pages
+  #         filters:
+  #           branches:
+  #             only: /master/
+  #           tags:
+  #             only: /^v.*/
