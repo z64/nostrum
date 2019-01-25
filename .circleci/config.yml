@@ -28,7 +28,7 @@ version: 2
     command: |
       mix local.hex --force
       mix local.rebar --force
-      mix deps.get
+      mix do deps.get, compile
 
 jobs:
   test:
