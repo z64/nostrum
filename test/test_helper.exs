@@ -1,2 +1,2 @@
-ExUnit.configure(exclude: [disabled: true])
+ExUnit.configure(exclude: [disabled: true], formatters: [JUnitFormatter, ExUnit.CLIFormatter])
 ExUnit.start()
