@@ -80,7 +80,8 @@ defmodule Nostrum.Mixfile do
       {:dialyxir, "~> 0.5", only: [:dev], runtime: false},
       {:websockex, git: "https://github.com/Azolo/websockex"},
       {:gen_stage, "~> 0.11"},
-      {:recon, "~> 2.3", only: :dev}
+      {:recon, "~> 2.3", only: :dev},
+      {:junit_formatter, ">= 0.0.0", only: :test}
     ]
   end
 end

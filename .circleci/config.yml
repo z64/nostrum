@@ -19,7 +19,6 @@ version: 2
   run:
     name: Install packages
     command: |
-      echo '@edge http://dl-cdn.alpinelinux.org/alpine/edge/testing' >>/etc/apk/repositories
       apk add git
 
 .install_dependencies: &install_dependencies
@@ -35,8 +34,8 @@ jobs:
     docker:
       - image: elixir:1.8-alpine
     steps:
-      - checkout
       - *install_packages
+      - checkout
       - *restore_mix_cache
       - *install_dependencies
       - *save_mix_cache
@@ -44,23 +43,12 @@ jobs:
       - store_test_results:
           path: _build/test/lib/nostrum
 
-  format:
-    docker:
-      - image: elixir:1.8-alpine
-    steps:
-      - checkout
-      - *install_packages
-      - *restore_mix_cache
-      - *install_dependencies
-      - *save_mix_cache
-      - run: mix format --check-formatted
-
   credo:
     docker:
       - image: elixir:1.8-alpine
     steps:
-      - checkout
       - *install_packages
+      - checkout
       - *restore_mix_cache
       - *install_dependencies
       - *save_mix_cache
@@ -70,12 +58,19 @@ jobs:
     docker:
       - image: elixir:1.8-alpine
     steps:
-      - checkout
       - *install_packages
+      - checkout
       - *restore_mix_cache
       - *install_dependencies
       - *save_mix_cache
       - run: mix docs
+
+  format:
+    docker:
+      - image: elixir:1.8-alpine
+    steps:
+      - checkout
+      - run: mix format --check-formatted
 
 workflows:
   version: 2
